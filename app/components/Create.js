@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import {
 	Text,
 	View,
@@ -6,31 +7,20 @@ import {
 	Modal,
 	TouchableHighlight
 } from 'react-native';
+import PlaylistItemRow from './playlist/PlaylistItemRow';
+import { playlistFetch } from '../actions';
+
 
 class Create extends Component {
 	constructor(props) {
 		super(props);
-
-		let dataBlob = [];
-		for (let i = 0; i < 2; i++) {
-			let rowInfo = {
-				id: i,
-				title: 'Row ' + i
-			};
-			dataBlob.push(rowInfo);
-		}
-
-		dataBlob.push({id:dataBlob.length, title: "+ Add"})
-
-		if (this.refs.listView) {
-			this.refs.listView.scrollTo({x:_scrollToBottomX - 80, animated:true});
-		}
-
 		this.state = {
-			dataValues: dataBlob,
-			dataSource: ds.cloneWithRows(dataBlob),
 			modalVisible: false
 		};
+	}
+
+	componentDidMount() {
+		this.props.playlistFetch();
 	}
 
 	handleAddItem() {
@@ -41,8 +31,6 @@ class Create extends Component {
 
 		// Open model.
 		this.setState({
-			dataValues: newDataValues,
-			dataSource: ds.cloneWithRows(newDataValues),
 			modalVisible: true
 		})
 	}
@@ -51,42 +39,66 @@ class Create extends Component {
 		this.refs.listView.scrollTo({x:_scrollToBottomX - 120, animated:true});
 		this.setState({modalVisible: visible});
 	}
-	
-	render() {
-		return (
-			<View style={styles.container}>
-				<Modal
-					animationType={"slide"}
-					transparent={false}
-					visible={this.state.modalVisible}
-					onRequestClose={() => {alert("Modal has been closed.")}}>
-					<View style={{marginTop: 22}}>
-						<View>
-							<Text>Hello World!</Text>
 
-							<TouchableHighlight onPress={() => {
+	render() {
+		if (this.props.playlist.loading) {
+			return (
+				<View style={styles.container}>
+					<Text>Loading...</Text>
+				</View>
+			)
+		}
+		else {
+			return (
+				<View style={styles.container}>
+					<Modal
+						animationType={"slide"}
+						transparent={false}
+						visible={this.state.modalVisible}
+						onRequestClose={() => {alert("Modal has been closed.")}}>
+						<View style={{marginTop: 22}}>
+							<View>
+								<Text>Hello World!</Text>
+
+								<TouchableHighlight onPress={() => {
 								this.setModalVisible(!this.state.modalVisible)
 							}}>
-								<Text>Hide Modal</Text>
-							</TouchableHighlight>
+									<Text>Hide Modal</Text>
+								</TouchableHighlight>
 
+							</View>
 						</View>
-					</View>
-				</Modal>
+					</Modal>
 
-				<ListView
-					dataSource={this.state.dataSource}
-					renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
-					horizontal={true}
-					onContentSizeChange={(contentWidth, contentHeight)=>{
-						_scrollToBottomX = contentWidth
-					}}
-					snapToAlignment={"center"}
-					ref="listView"
-				/>
-			</View>
-		)
+					<ListView
+						dataSource={this.props.playlist.list}
+						renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
+						horizontal={true}
+						snapToAlignment={"center"}
+						ref="listView"
+					/>
+				</View>
+			)
+		}
+
 	}
 }
 
-export default Create;
+const styles = {
+	container: {
+		flex:1,
+		marginTop: 30
+	}
+};
+
+const mapStateToProps = ({ playlist }) => {
+	return {
+		playlist: playlist,
+	}
+};
+
+const mapActionsToProps = {
+	playlistFetch
+};
+
+export default connect(mapStateToProps, mapActionsToProps)(Create);

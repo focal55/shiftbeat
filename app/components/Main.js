@@ -39,7 +39,7 @@ class _Main extends Component {
 				break;
 
       default:
-        return <More />;
+        return <Featured />;
     }
   }
 
