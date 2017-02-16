@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Text, View, ListView, Modal, TouchableHighlight } from 'react-native';
 import PlaylistsRow from './playlist/PlaylistsRow';
+import Player from './player/Player';
 import { allPlaylistsFetch, playlistSelect, playlistClear } from '../actions';
 
 const renderModal = (props) => {
@@ -12,22 +13,7 @@ const renderModal = (props) => {
 				transparent={false}
 				visible={props.modalVisible}
 				onRequestClose={() => {alert("Modal has been closed.")}}>
-				<View style={{marginTop: 22}}>
-					<View>
-						<Text>{ props.playlist.selected.title }</Text>
-
-
-						/* SONG LIST */
-
-
-						<TouchableHighlight onPress={() => {
-								props.playlistClear()
-							}}>
-							<Text>Hide Modal</Text>
-						</TouchableHighlight>
-
-					</View>
-				</View>
+				<Player />
 			</Modal>
 		)
 	}
