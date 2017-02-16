@@ -4,7 +4,8 @@ import {
 	PLAYLIST_SELECT,
 	PLAYLIST_IS_LOADING,
 	PLAYLIST_FETCH_SUCCESS,
-	ALL_PLAYLISTS_FETCH_SUCCESS
+	ALL_PLAYLISTS_FETCH_SUCCESS,
+	NEW_PLAYLISTS_CREATE_SUCCESS
 } from './types';
 
 const headers = {
@@ -25,6 +26,21 @@ export const playlistClear = () => {
     type: PLAYLIST_CLEAR,
     payload: null
   }
+};
+
+export const playlistCreate = () => {
+	let playlist = [
+		{
+			title: '',
+			songs: []
+		}
+	];
+
+	let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+	return {
+		type: NEW_PLAYLISTS_CREATE_SUCCESS,
+		payload: ds.cloneWithRows(playlist)
+	}
 };
 
 export const allPlaylistsFetch = () => {

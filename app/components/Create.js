@@ -8,19 +8,27 @@ import {
 	TouchableHighlight
 } from 'react-native';
 import PlaylistItemRow from './playlist/PlaylistItemRow';
-import { playlistFetch } from '../actions';
+import Search from './songs/Search';
+import Row from './playlist/PlaylistItemRow';
+import { playlistCreate } from '../actions';
 
+const renderModal = (props) => {
+	if (props.playlist.selected && props.playlist.modalVisible) {
+		return (
+			<Modal
+				animationType={"slide"}
+				transparent={false}
+				visible={props.modalVisible}
+				onRequestClose={() => {alert("Modal has been closed.")}}>
+				<Search />
+			</Modal>
+		)
+	}
+};
 
 class Create extends Component {
-	constructor(props) {
-		super(props);
-		this.state = {
-			modalVisible: false
-		};
-	}
-
 	componentDidMount() {
-		this.props.playlistFetch();
+		this.props.playlistCreate();
 	}
 
 	handleAddItem() {
@@ -28,59 +36,21 @@ class Create extends Component {
 		newDataValues.pop();
 		newDataValues.push({id: this.state.dataValues.length, title: "Row " + this.state.dataValues.length});
 		newDataValues.push({id:newDataValues.length, title: "+ Add"});
-
-		// Open model.
-		this.setState({
-			modalVisible: true
-		})
-	}
-
-	setModalVisible(visible) {
-		this.refs.listView.scrollTo({x:_scrollToBottomX - 120, animated:true});
-		this.setState({modalVisible: visible});
 	}
 
 	render() {
-		if (this.props.playlist.loading) {
-			return (
-				<View style={styles.container}>
-					<Text>Loading...</Text>
-				</View>
-			)
-		}
-		else {
-			return (
-				<View style={styles.container}>
-					<Modal
-						animationType={"slide"}
-						transparent={false}
-						visible={this.state.modalVisible}
-						onRequestClose={() => {alert("Modal has been closed.")}}>
-						<View style={{marginTop: 22}}>
-							<View>
-								<Text>Hello World!</Text>
-
-								<TouchableHighlight onPress={() => {
-								this.setModalVisible(!this.state.modalVisible)
-							}}>
-									<Text>Hide Modal</Text>
-								</TouchableHighlight>
-
-							</View>
-						</View>
-					</Modal>
-
-					<ListView
-						dataSource={this.props.playlist.list}
-						renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
-						horizontal={true}
-						snapToAlignment={"center"}
-						ref="listView"
-					/>
-				</View>
-			)
-		}
-
+		return (
+			<View style={styles.container}>
+				{renderModal(this.props)}
+				<ListView
+					dataSource={this.props.playlist.list}
+					renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
+					horizontal={true}
+					snapToAlignment={"center"}
+					ref="listView"
+				/>
+			</View>
+		)
 	}
 }
 
@@ -98,7 +68,7 @@ const mapStateToProps = ({ playlist }) => {
 };
 
 const mapActionsToProps = {
-	playlistFetch
+	playlistCreate
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(Create);

@@ -2,7 +2,8 @@ import {
 	PLAYLIST_CLEAR,
 	PLAYLIST_SELECT,
 	PLAYLIST_FETCH_SUCCESS,
-	ALL_PLAYLISTS_FETCH_SUCCESS
+	ALL_PLAYLISTS_FETCH_SUCCESS,
+	NEW_PLAYLISTS_CREATE_SUCCESS
 } from '../actions/types';
 
 const INITIAL_STATE = {
@@ -22,7 +23,11 @@ export default (state = INITIAL_STATE, action) => {
 			break;
 		case PLAYLIST_FETCH_SUCCESS:
 			return { ...state, list: action.payload, loading: false };
+			break;
 		case ALL_PLAYLISTS_FETCH_SUCCESS:
+			return { ...state, list: action.payload, loading: false };
+			break;
+		case NEW_PLAYLISTS_CREATE_SUCCESS:
 			return { ...state, list: action.payload, loading: false };
 		default:
 			return state;
