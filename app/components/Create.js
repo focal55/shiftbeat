@@ -7,19 +7,19 @@ import {
 	Modal,
 	TouchableHighlight
 } from 'react-native';
-import PlaylistItemRow from './playlist/PlaylistItemRow';
 import Search from './songs/Search';
 import Row from './playlist/PlaylistItemRow';
-import { playlistCreate } from '../actions';
+import { playlistCreate, playlistAddSong, addSongClear } from '../actions';
+
+let _scrollToBottomX;
 
 const renderModal = (props) => {
-	if (props.playlist.selected && props.playlist.modalVisible) {
+	if (props.addSong && props.modalVisible) {
 		return (
 			<Modal
 				animationType={"slide"}
 				transparent={false}
-				visible={props.modalVisible}
-				onRequestClose={() => {alert("Modal has been closed.")}}>
+				visible={props.modalVisible}>
 				<Search />
 			</Modal>
 		)
@@ -31,11 +31,12 @@ class Create extends Component {
 		this.props.playlistCreate();
 	}
 
+	componentDidUpdate() {
+		this.refs.listView.scrollTo({x:_scrollToBottomX - 120, animated:true});
+	}
+
 	handleAddItem() {
-		let newDataValues = this.state.dataValues;
-		newDataValues.pop();
-		newDataValues.push({id: this.state.dataValues.length, title: "Row " + this.state.dataValues.length});
-		newDataValues.push({id:newDataValues.length, title: "+ Add"});
+		this.props.playlistAddSong(this.props.playlist);
 	}
 
 	render() {
@@ -43,9 +44,12 @@ class Create extends Component {
 			<View style={styles.container}>
 				{renderModal(this.props)}
 				<ListView
-					dataSource={this.props.playlist.list}
+					dataSource={this.props.songList}
 					renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
 					horizontal={true}
+					onContentSizeChange={(contentWidth, contentHeight)=>{
+						_scrollToBottomX = contentWidth
+					}}
 					snapToAlignment={"center"}
 					ref="listView"
 				/>
@@ -63,12 +67,17 @@ const styles = {
 
 const mapStateToProps = ({ playlist }) => {
 	return {
-		playlist: playlist,
+		songList: playlist.list,
+		playlist: playlist.playlist,
+		modalVisible: playlist.modalVisible,
+		addSong: playlist.addSong
 	}
 };
 
 const mapActionsToProps = {
-	playlistCreate
+	playlistCreate,
+	playlistAddSong,
+	addSongClear
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(Create);

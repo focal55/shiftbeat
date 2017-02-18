@@ -4,6 +4,8 @@ import {
 	PLAYLIST_SELECT,
 	PLAYLIST_IS_LOADING,
 	PLAYLIST_FETCH_SUCCESS,
+	PLAYLIST_ADD_SONG,
+	ADD_SONG_CLEAR,
 	ALL_PLAYLISTS_FETCH_SUCCESS,
 	NEW_PLAYLISTS_CREATE_SUCCESS
 } from './types';
@@ -29,17 +31,22 @@ export const playlistClear = () => {
 };
 
 export const playlistCreate = () => {
-	let playlist = [
-		{
-			title: '',
-			songs: []
-		}
-	];
+	let playlist = {
+		title: '',
+		songs: [
+			{
+				title: "+ Add"
+			}
+		]
+	};
 
 	let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
 	return {
 		type: NEW_PLAYLISTS_CREATE_SUCCESS,
-		payload: ds.cloneWithRows(playlist)
+		payload: {
+			playlist: playlist,
+			list: ds.cloneWithRows(playlist.songs)
+		}
 	}
 };
 
@@ -117,4 +124,26 @@ export const playlistFetch = () => {
     type: PLAYLIST_FETCH_SUCCESS,
 		payload: ds.cloneWithRows(playlist.songs)
   }
+};
+
+export const playlistAddSong = (playlist) => {
+	playlist.songs.pop();
+	playlist.songs.push({id: playlist.songs.length, title: "Row " + playlist.songs.length});
+	playlist.songs.push({id: playlist.songs.length, title: "+ Add"});
+	let ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
+	return {
+		type: PLAYLIST_ADD_SONG,
+		payload: {
+			playlist: playlist,
+			list: ds.cloneWithRows(playlist.songs)
+		}
+	}
+};
+
+export const addSongClear = () => {
+	//this.refs.listView.scrollTo({x:_scrollToBottomX - 120, animated:true});
+	return {
+		type: ADD_SONG_CLEAR,
+		payload: null
+	}
 };
