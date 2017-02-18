@@ -32,7 +32,9 @@ class Create extends Component {
 	}
 
 	componentDidUpdate() {
-		this.refs.listView.scrollTo({x:_scrollToBottomX - 120, animated:true});
+		if (this.props.playlist.songs.length > 1) {
+			this.refs.listView.scrollTo({ x: _scrollToBottomX - 80, animated: true });
+		}
 	}
 
 	handleAddItem() {
