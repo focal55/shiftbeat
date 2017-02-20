@@ -5,94 +5,80 @@ import {
 	View,
 	ListView,
 	Modal,
-	TouchableHighlight,
-	NativeModules, Image
+	NativeModules
 } from 'react-native';
 import Search from './songs/Search';
 import Row from './playlist/PlaylistItemRow';
-import { playlistCreate, playlistAddSong, addSongClear } from '../actions';
+import SpotifyLogin from './spotify/SpotifyLogin';
+import {
+	playlistCreate,
+	playlistAddSong,
+	addSongClear,
+	spotifyCheckAccess,
+	spotifyLogin
+} from '../actions';
 
 const Spotify = NativeModules.Spotify;
-
 let _scrollToBottomX;
-
-const renderModal = (props) => {
-	if (props.addSong && props.modalVisible) {
-		if (props.spotify) {
-			return (
-				<Modal
-					animationType={"slide"}
-					transparent={false}
-					visible={props.modalVisible}>
-					<Search />
-				</Modal>
-			)
-		}
-		else {
-			return (
-				<Modal
-					animationType={"slide"}
-					transparent={false}
-					visible={props.modalVisible}>
-					<TouchableHighlight style={styles.button} onPress={
-                  ()=>{
-                    //Start Auth process
-                    Spotify.login({
-                    	clientID:'6d19db9452464b8f8d5048a8775e90f3',
-                    	redirectURL: 'freaque://callback',
-                    	requestedScopes: ['streaming']
-                    },(error)=>{
-                      if(!error){
-                      	console.log("here");
-                        this.props.navigator.replace({component: logInSuccess, title: 'Success'});
-                      } else {
-                        console.log('error:',error);
-                      }
-                    });
-                  }
-                }>
-						<Image resizeMode ={'contain'}
-									 style={styles.image}
-									 source={require('../images/login-button-mobile.png')}
-						/>
-					</TouchableHighlight>
-				</Modal>
-			)
-		}
-	}
-};
 
 class Create extends Component {
 	componentDidMount() {
+		// Create new playlist.
 		this.props.playlistCreate();
+		// Check for Spotify auth.
+		this.props.spotifyCheckAccess();
 	}
 
 	componentDidUpdate() {
-		if (this.props.playlist.songs.length > 1) {
+		// On update move the list view.
+		if (this.props.playlist.songs.length > 2) {
 			this.refs.listView.scrollTo({ x: _scrollToBottomX - 80, animated: true });
 		}
 	}
 
 	handleAddItem() {
-		this.props.playlistAddSong(this.props.playlist);
+		// Check for Spotify auth check.
+		if (this.props.spotify_access_token) {
+			this.props.playlistAddSong(this.props.playlist);
+		}
+		// No Spotify auth, show login.
+		else {
+			this.props.spotifyLogin();
+		}
 	}
 
 	render() {
-		return (
-			<View style={styles.container}>
-				{renderModal(this.props)}
-				<ListView
-					dataSource={this.props.songList}
-					renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
-					horizontal={true}
-					onContentSizeChange={(contentWidth, contentHeight)=>{
-						_scrollToBottomX = contentWidth
-					}}
-					snapToAlignment={"center"}
-					ref="listView"
+		// If we are showing the Spotify Auth.
+		if (this.props.spotify_show_login) {
+			return (
+				<SpotifyLogin
+					playlist={this.props.playlist}
 				/>
-			</View>
-		)
+			)
+		}
+		// We have Spotify Auth, show normal Create Ui.
+		else {
+			return (
+				<View style={styles.container}>
+					<Modal
+						animationType={"slide"}
+						transparent={false}
+						visible={this.props.modalVisible}>
+						<Search />
+					</Modal>
+					<ListView
+						dataSource={this.props.songList}
+						renderRow={(data) => <Row {...data} onPress={this.handleAddItem.bind(this)} />}
+						horizontal={true}
+						onContentSizeChange={(contentWidth, contentHeight)=>{
+							_scrollToBottomX = contentWidth
+						}}
+						snapToAlignment={"center"}
+						ref="listView"
+					/>
+				</View>
+			)
+		}
 	}
 }
 
@@ -115,19 +101,23 @@ const styles = {
 };
 
 
-const mapStateToProps = ({ playlist }) => {
+const mapStateToProps = ({ playlist, spotify }) => {
 	return {
 		songList: playlist.list,
 		playlist: playlist.playlist,
 		modalVisible: playlist.modalVisible,
-		addSong: playlist.addSong
+		addSong: playlist.addSong,
+		spotify_access_token: spotify.access_token,
+		spotify_show_login: spotify.showLogin
 	}
 };
 
 const mapActionsToProps = {
 	playlistCreate,
 	playlistAddSong,
-	addSongClear
+	addSongClear,
+	spotifyLogin,
+	spotifyCheckAccess
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(Create);
