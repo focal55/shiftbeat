@@ -7,10 +7,10 @@ import {
 	TouchableHighlight,
 	NativeModules
 } from 'react-native';
-import { addSongClear, spotifySearch } from '../../actions';
+import { addSongClear, spotifySearchText, spotifyUpdateSearchResults } from '../../actions';
 
 const renderSearchResults = (props) => {
-	if (props.spotify_search_results) {
+	if (props.spotify_search_results && !props.spotify_search_loading) {
 		return props.spotify_search_results.map(item => (
 			<Text key={item.id}>{item.name}</Text>
 		));
@@ -21,6 +21,12 @@ const renderSearchResults = (props) => {
 };
 
 class Search extends Component {
+
+	handleUpdateSearchResults(text) {
+		this.props.spotifySearchText(text);
+		this.props.spotifyUpdateSearchResults(this.props.spotify_access_token, text, 'artist');
+	}
+
 	render() {
 		return (
 			<View style={styles.container}>
@@ -34,7 +40,7 @@ class Search extends Component {
 						<TextInput
 							placeholder="Search Spotify"
 							value={this.props.spotify_search_text}
-							onChangeText={text => this.props.spotifySearch(this.props.spotify_access_token, text)}
+							onChangeText={this.handleUpdateSearchResults.bind(this)}
 							style={styles.formInput}
 						/>
 					</View>
@@ -106,13 +112,15 @@ const mapStateToProps = ({ spotify }) => {
 	return {
 		spotify_access_token: spotify.access_token,
 		spotify_search_text: spotify.search_text,
-		spotify_search_results: spotify.search_results
+		spotify_search_results: spotify.search_results,
+		spotify_search_loading: spotify.search_loading
 	}
 };
 
 const mapActionsToProps = {
 	addSongClear,
-	spotifySearch
+	spotifySearchText,
+	spotifyUpdateSearchResults
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(Search);

@@ -11,4 +11,5 @@ export const ADD_SONG_CLEAR = 'add_song_clear';
 
 export const SPOTIFY_LOGIN = 'spotify_login';
 export const SPOTIFY_LOGIN_SUCCESS = 'spotify_login_success';
-export const SPOTIFY_SEARCH = 'spotify_search';
+export const SPOTIFY_SEARCH_TEXT = 'spotify_search_text';
+export const SPOTIFY_UPDATE_SEARCH_RESULTS = 'spotify_update_search_results';
