@@ -7,12 +7,14 @@ import {
 	TouchableHighlight,
 	NativeModules
 } from 'react-native';
-import { addSongClear, spotifySearchText, spotifyUpdateSearchResults } from '../../actions';
+import SearchForm from './SearchForm';
+import SearchItem from './SearchItem';
+import { addSongClear } from '../../actions';
 
 const renderSearchResults = (props) => {
 	if (props.spotify_search_results && !props.spotify_search_loading) {
 		return props.spotify_search_results.map(item => (
-			<Text key={item.id}>{item.name}</Text>
+			<SearchItem key={item.id} searchTypeItem={props.spotify_search_type} data={{...item}} />
 		));
 	}
 	else {
@@ -22,36 +24,23 @@ const renderSearchResults = (props) => {
 
 class Search extends Component {
 
-	handleUpdateSearchResults(text) {
-		this.props.spotifySearchText(text);
-		this.props.spotifyUpdateSearchResults(this.props.spotify_access_token, text, 'artist');
-	}
-
 	render() {
 		return (
 			<View style={styles.container}>
 				<View style={styles.wrapper}>
-
 					<View style={styles.screenTitleWrapper}>
 						<Text style={styles.screenTitle}>Search Spotify</Text>
 					</View>
 
-					<View style={styles.formItem}>
-						<TextInput
-							placeholder="Search Spotify"
-							value={this.props.spotify_search_text}
-							onChangeText={this.handleUpdateSearchResults.bind(this)}
-							style={styles.formInput}
-						/>
-					</View>
+					<SearchForm />
 
 					<View style={styles.resultsWrapper}>
 						{renderSearchResults(this.props)}
 					</View>
 
 					<TouchableHighlight onPress={() => {
-								this.props.addSongClear()
-							}}>
+                        this.props.addSongClear()
+                    }}>
 						<Text>Hide Modal</Text>
 					</TouchableHighlight>
 				</View>
@@ -81,17 +70,6 @@ const styles = {
 	screenTitle: {
 		fontSize: 18
 	},
-	formItem: {
-		flexDirection: 'row',
-	},
-	formInput: {
-		flex: 1,
-		height: 20,
-		width: 100,
-		borderRadius: 3,
-		borderWidth: 1,
-		borderColor: 'gray'
-	},
 	resultsWrapper: {
 		paddingTop: 20
 	},
@@ -110,17 +88,14 @@ const styles = {
 
 const mapStateToProps = ({ spotify }) => {
 	return {
-		spotify_access_token: spotify.access_token,
-		spotify_search_text: spotify.search_text,
+        spotify_search_type: spotify.search_type,
 		spotify_search_results: spotify.search_results,
 		spotify_search_loading: spotify.search_loading
 	}
 };
 
 const mapActionsToProps = {
-	addSongClear,
-	spotifySearchText,
-	spotifyUpdateSearchResults
+	addSongClear
 };
 
 export default connect(mapStateToProps, mapActionsToProps)(Search);

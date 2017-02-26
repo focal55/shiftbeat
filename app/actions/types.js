@@ -13,3 +13,4 @@ export const SPOTIFY_LOGIN = 'spotify_login';
 export const SPOTIFY_LOGIN_SUCCESS = 'spotify_login_success';
 export const SPOTIFY_SEARCH_TEXT = 'spotify_search_text';
 export const SPOTIFY_UPDATE_SEARCH_RESULTS = 'spotify_update_search_results';
+export const SPOTIFY_SET_SEARCH_TYPE = 'spotify_set_search_type';
